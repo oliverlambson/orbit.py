@@ -12,7 +12,7 @@ productivity and provide higher abstraction layer for NATS clients.
 Note that these libraries will evolve rapidly and API guarantees are not made
 until the specific project has a v1.0.0 version.
 
-You can use the library as a whole, or pick just what you need.
+You can <!--use the library as a whole, or-->pick just what you need.
 
 # Utilities
 
