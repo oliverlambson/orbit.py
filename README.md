@@ -17,6 +17,6 @@ You can use the library as a whole, or pick just what you need.
 # Utilities
 
 | Module               | Description          | Docs                                | Version |
-|----------------------|----------------------|-------------------------------------|---------|
+| -------------------- | -------------------- | ----------------------------------- | ------- |
 | Core NATS Extensions | Core NATS extensions | [README.md](natsext/README.md)      | 0.1.0   |
-| JetStream Extensions | JetStream extensions | [README.md](jetstreamext/README.md) | wip     |
+| JetStream Extensions | JetStream extensions | [README.md](jetstreamext/README.md) | 0.1.0   |
