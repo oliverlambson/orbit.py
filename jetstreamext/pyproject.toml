@@ -3,13 +3,25 @@ name = "jetstreamext"
 version = "0.1.0"
 description = "JetStream Extensions is a set of utilities providing additional features to `jetstream` package in nats-py client."
 readme = "README.md"
+license = { text = "Apache 2 License" }
 authors = [
     { name = "Oliver Lambson", email = "oliverlambson@gmail.com" }
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "natsext",
+    "natsext>=0.1.0",
     "nats-py>=2.11.0",
+]
+classifiers = [
+    'License :: OSI Approved :: Apache Software License',
+    'Intended Audience :: Developers',
+    'Development Status :: 2 - Pre-Alpha',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13'
 ]
 
 [build-system]
@@ -19,9 +31,52 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
+    "pytest-asyncio>=1.1.0",
     "ruff>=0.12.12",
+    "testcontainers>=4.12.0",
     "ty>=0.0.1a20",
 ]
 
+# TODO: how does the path dependency affect build & publish?
 [tool.uv.sources]
 natsext = { path = "../natsext" }
+
+[tool.ty.rules]
+division-by-zero = "warn"
+possibly-unresolved-reference = "warn"
+unused-ignore-comment = "warn"
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # bugbear
+    "TD",    # todos
+    "PERF",  # performance
+    "RUF",   # ruff
+    "ASYNC", # flake8-async
+    "S",     # bandit
+    "BLE",   # blind except
+    "FBT",   # boolean trap
+    "A",     # shadowing builtins
+    "DTZ",   # datetime timezone
+    "EM",    # error message
+    "FA",    # future annotations
+    "G",     # logging format
+]
+ignore = [
+    "E501",  # line too long (handled by ruff format)
+    "W505",  # line too long (handled by ruff format)
+    "TD002", # todo author
+    "TD003", # todo link
+    "S101",  # use of assert
+]
+
+[tool.ruff.format]
+docstring-code-format = true

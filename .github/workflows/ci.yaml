@@ -12,7 +12,7 @@ on:
       - main
 
 jobs:
-  checks:
+  natsext-checks:
     if: ${{ ! github.event.pull_request.draft == true }}
     runs-on: ubuntu-latest
     steps:
@@ -35,3 +35,27 @@ jobs:
         working-directory: natsext
       - run: uv run --python=3.10 pytest .
         working-directory: natsext
+
+  jetstreamext-checks:
+    if: ${{ ! github.event.pull_request.draft == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: |
+            3.10
+            3.13
+      - run: uv lock --check
+        working-directory: jetstreamext
+      - run: uv run --python=3.13 ruff format --check .
+        working-directory: jetstreamext
+      - run: uv run --python=3.13 ruff check .
+        working-directory: jetstreamext
+      - run: uv run --python=3.13 ty check .
+        working-directory: jetstreamext
+      - run: uv run --python=3.13 pytest .
+        working-directory: jetstreamext
+      - run: uv run --python=3.10 pytest .
+        working-directory: jetstreamext
