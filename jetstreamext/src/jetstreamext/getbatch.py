@@ -66,6 +66,8 @@ class _GetLastBatchOpts:
     up_to_time: datetime | None = None
 
 
+# TODO: this chaining of opt "wrapper" functions is idiomatic of go, but in python
+# should probably rather be single a Config class passed in.
 def get_batch_seq(seq: int) -> Callable[[_GetBatchOpts], None]:
     """Set the sequence number from which to start fetching messages."""
 
