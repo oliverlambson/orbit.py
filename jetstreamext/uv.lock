@@ -139,7 +139,7 @@ wheels = [
 
 [[package]]
 name = "jetstreamext"
-version = "0.1.2"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "nats-py" },
@@ -178,7 +178,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/65/be/757c8af63596453da
 
 [[package]]
 name = "natsext"
-version = "0.1.2"
+version = "0.2.0"
 source = { directory = "../natsext" }
 dependencies = [
     { name = "nats-py" },
