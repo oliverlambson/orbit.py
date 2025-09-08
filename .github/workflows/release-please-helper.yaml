@@ -1,0 +1,58 @@
+name: release-please-helper
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-lock:
+    if: startsWith(github.head_ref, 'release-please--')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: 3.13
+
+      - name: Update lock file (natsext)
+        run: uv lock
+        working-directory: natsext
+
+      - name: Update lock file (jestreamext)
+        run: uv lock
+        working-directory: jetstreamext
+
+      - name: Check diff is only uv.lock files and each file's diff is at most 1 line updated
+        run: .github/scripts/validate-uv-lock-diff.sh
+
+      - name: Commit and push if needed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add uv.lock
+            git commit -m "chore: update uv lockfile(s)"
+            git push
+          fi
+
+      - name: Set PR ready to review
+        if: github.event.pull_request.draft
+        run: |
+          gh pr ready ${{ github.event.pull_request.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
