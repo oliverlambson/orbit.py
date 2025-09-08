@@ -1,0 +1,76 @@
+name: release-please-helper
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-lock:
+    if: startsWith(github.head_ref, 'release-please--')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get PR details
+        id: pr-details
+        run: |
+          NEW_VERSION=$(echo "${{ github.event.pull_request.title }}" | sed 's/^.* \(.*\)$/\1/g')
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+
+      - uses: actions/checkout@v5
+        with:
+          token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
+          ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v6
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version-file: pyproject.toml
+
+      - name: Update lock file
+        run: uv lock
+
+      - name: Check diff is only version update
+        run: |
+          ADDED_LINES=$(git diff | grep '^+[^+]' | sed 's/^+//')
+          DELETED_LINES=$(git diff | grep '^-[^-]' | sed 's/^-//')
+          if [ -z "$ADDED_LINES" ] && [ -z "$DELETED_LINES" ]; then
+            echo "No changes"
+            exit 0
+          fi
+
+          N_ADDED=$(echo "$ADDED_LINES" | wc -l)
+          N_DELETED=$(echo "$DELETED_LINES" | wc -l)
+
+          if [ "$N_ADDED" -eq 1 ] && [ "$N_DELETED" -eq 1 ]; then
+            if echo "$ADDED_LINES" | grep -q '${{ steps.pr-details.outputs.new_version }}'; then
+              echo "Only version updated, continuing..."
+            else
+              echo "Added line does not match new_version=${{ steps.pr-details.outputs.new_version }}"
+              echo "ADDED_LINES=$ADDED_LINES"
+              exit 1
+            fi
+          else
+            echo "Error: Expected exactly 1 line change in uv.lock, but got N_ADDED=$N_ADDED N_DELETED=$N_DELETED:"
+            echo -e "ADDED_LINES=\n$ADDED_LINES"
+            echo -e "DELETED_LINES=\n$DELETED_LINES"
+            exit 1
+          fi
+
+      - name: Commit and push if needed
+        run: |
+          if [ -n "$(git status --porcelain)" ]; then
+            git config --local user.email "github-actions[bot]@users.noreply.github.com"
+            git config --local user.name "github-actions[bot]"
+            git add uv.lock
+            git commit -m "chore: update uv.lock"
+            git push
+          fi
