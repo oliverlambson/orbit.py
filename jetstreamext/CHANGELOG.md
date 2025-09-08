@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.1.2...jetstreamext-v0.2.0) (2025-09-08)
+
+
+### Features
+
+* more pythonic interface for getbatch opts ([a164bd4](https://github.com/oliverlambson/orbit.py/commit/a164bd4dc04f578e8618d0d859a503d19e2f0863))
+
+
+### Bug Fixes
+
+* **license:** add NOTICE ([a864467](https://github.com/oliverlambson/orbit.py/commit/a8644677f0296eabb04c966d5135253ef3608d60))
+
 ## [0.1.2](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.1.1...jetstreamext-v0.1.2) (2025-09-08)
 
 

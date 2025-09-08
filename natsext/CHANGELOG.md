@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.0](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.1.2...natsext-v0.2.0) (2025-09-08)
+
+
+### Bug Fixes
+
+* **license:** add NOTICE ([a864467](https://github.com/oliverlambson/orbit.py/commit/a8644677f0296eabb04c966d5135253ef3608d60))
+
 ## [0.1.2](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.1.1...natsext-v0.1.2) (2025-09-08)
 
 
