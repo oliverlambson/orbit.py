@@ -6,7 +6,8 @@
 
 import asyncio
 
-from nats import NATS
+import nats
+from nats.aio.client import Client as NATS
 from nats.aio.msg import Msg
 from nats.aio.subscription import Subscription
 
@@ -14,8 +15,7 @@ import natsext
 
 
 async def main() -> None:
-    nc = NATS()
-    await nc.connect()
+    nc = await nats.connect()
 
     # Set up responders
     print("Setting up responders...")
@@ -30,7 +30,7 @@ async def main() -> None:
         # Using request_many_msg to send a nats.Msg request
         print("\n=== request_many_msg usage ===")
         msg = Msg(
-            _client=nc,
+            nc,
             subject="subject",
             data=b"request data",
             headers={

@@ -7,7 +7,7 @@
 import asyncio
 from datetime import datetime, timedelta, timezone
 
-from nats import NATS
+import nats
 from nats.js import JetStreamContext
 from nats.js.api import StreamConfig
 
@@ -15,8 +15,7 @@ import jetstreamext
 
 
 async def main() -> None:
-    nc = NATS()
-    await nc.connect()
+    nc = await nats.connect()
     js = nc.jetstream()
 
     # Set up stream and test data

@@ -21,21 +21,27 @@ Responses are returned in an async iterator, which you can iterate over to recei
 When a termination condition is met, the iterator is closed (and no error is returned).
 
 ```py
-import natsext
-
-# Basic usage
-async for msg in natsext.request_many(nc, "subject", b"request data"):
-    print(msg.data)
-```
-
-Alternatively, use `request_many_msg` to send a `nats.Msg` request:
-
-```py
 import nats
 import natsext
 
-msg = nats.Msg(
-    _client=nc,
+nc = await nats.connect()
+
+# Basic usage
+async for msg in natsext.request_many(nc, "subject", b"request data"):
+    print(f"Received: {msg.data}")
+```
+
+Alternatively, use `request_many_msg` to send a `Msg` request:
+
+```py
+import nats
+from nats.aio.msg import Msg
+import natsext
+
+nc = await nats.connect()
+
+msg = Msg(
+    nc,
     subject="subject",
     data=b"request data",
     headers={
@@ -43,7 +49,7 @@ msg = nats.Msg(
     },
 )
 async for response in natsext.request_many_msg(nc, msg):
-    print(response.data)
+    print(f"Received: {response.data}")
 ```
 
 #### Configuration
@@ -56,6 +62,11 @@ You can configure the following options:
 - `sentinel`: Function that stops returning responses once it returns True for a message (Callable[[Msg], bool])
 
 ```py
+import nats
+import natsext
+
+nc = await nats.connect()
+
 # With all options
 async for msg in natsext.request_many(
     nc,
@@ -63,10 +74,10 @@ async for msg in natsext.request_many(
     b"request data",
     timeout=5.0,
     stall=0.1,
-    max_messages=10,
-    sentinel=natsext.default_sentinel  # Stops on empty message
+    max_messages=3,
+    sentinel=None,  # Don't use sentinel here to show max_messages working
 ):
-    print(msg.data)
+    print(f"Received: {msg.data}")
 ```
 
 #### Default Sentinel
@@ -74,10 +85,13 @@ async for msg in natsext.request_many(
 The package includes a `default_sentinel` function that stops receiving messages once a message with an empty payload is received:
 
 ```py
+import nats
 import natsext
+
+nc = await nats.connect()
 
 async for msg in natsext.request_many(
     nc, "subject", b"request", sentinel=natsext.default_sentinel
 ):
-    print(msg.data)
+    print(f"Received: {msg.data}")
 ```
