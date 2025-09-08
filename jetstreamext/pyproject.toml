@@ -1,0 +1,27 @@
+[project]
+name = "jetstreamext"
+version = "0.1.0"
+description = "JetStream Extensions is a set of utilities providing additional features to `jetstream` package in nats-py client."
+readme = "README.md"
+authors = [
+    { name = "Oliver Lambson", email = "oliverlambson@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "natsext",
+    "nats-py>=2.11.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.12.12",
+    "ty>=0.0.1a20",
+]
+
+[tool.uv.sources]
+natsext = { path = "../natsext" }
