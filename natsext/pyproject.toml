@@ -1,0 +1,23 @@
+[project]
+name = "natsext"
+version = "0.1.0"
+description = "Core NATS Extensions is a set of utilities providing additional features to Core NATS component of nats-py client."
+readme = "README.md"
+authors = [
+    { name = "Oliver Lambson", email = "oliverlambson@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "nats-py>=2.11.0",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+    "ruff>=0.12.12",
+    "ty>=0.0.1a20",
+]
