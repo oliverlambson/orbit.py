@@ -2,8 +2,6 @@ name: publish-natsext
 
 on:
   push:
-    branches:
-      - main
     tags:
       - natsext-v*
 

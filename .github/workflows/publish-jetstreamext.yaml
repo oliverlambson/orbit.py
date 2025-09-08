@@ -2,8 +2,6 @@ name: publish-jetstreamext
 
 on:
   push:
-    branches:
-      - main
     tags:
       - jetstreamext-v*
 
