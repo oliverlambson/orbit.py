@@ -13,8 +13,9 @@
 
 """JetStream Extensions - utilities providing additional features to JetStream."""
 
-from . import getbatch
-from .getbatch import (
+from jetstreamext import getbatch
+from jetstreamext._version import __version__
+from jetstreamext.getbatch import (
     BatchUnsupportedError,
     InvalidOptionError,
     InvalidResponseError,
@@ -37,6 +38,7 @@ __all__ = [
     "InvalidResponseError",
     "NoMessagesError",
     "SubjectRequiredError",
+    "__version__",
     "get_batch",
     "get_batch_max_bytes",
     "get_batch_seq",

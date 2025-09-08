@@ -13,9 +13,11 @@
 
 """Core NATS Extensions - utilities providing additional features to Core NATS."""
 
-from .requestmany import default_sentinel, request_many, request_many_msg
+from natsext._version import __version__
+from natsext.requestmany import default_sentinel, request_many, request_many_msg
 
 __all__ = [
+    "__version__",
     "default_sentinel",
     "request_many",
     "request_many_msg",
