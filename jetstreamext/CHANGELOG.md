@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.1.0...jetstreamext-v0.1.1) (2025-09-08)
+
+
+### Bug Fixes
+
+* **jetstreamext:** add examples.py ([e5b1a67](https://github.com/oliverlambson/orbit.py/commit/e5b1a67f6a49a84f1c05fd440abcdac15d8a22b3))
+
 ## 0.1.0 (2025-09-08)
 
 
