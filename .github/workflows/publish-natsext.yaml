@@ -1,10 +1,11 @@
 name: publish-natsext
 
 on:
-  release:
-    types:
-      - prereleased
-      - released
+  push:
+    branches:
+      - main
+    tags:
+      - natsext-v*
 
 permissions:
   contents: write
@@ -22,9 +23,6 @@ jobs:
           python-version: |
             3.13
       - run: uv build
-        working-directory: natsext
-      - if: github.event.release.prerelease
-        run: uv publish --index testpypi
         working-directory: natsext
       - if: ${{ ! github.event.release.prerelease }}
         run: uv publish

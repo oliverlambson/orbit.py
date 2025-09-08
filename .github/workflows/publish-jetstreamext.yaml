@@ -1,10 +1,11 @@
 name: publish-jetstreamext
 
 on:
-  release:
-    types:
-      - prereleased
-      - released
+  push:
+    branches:
+      - main
+    tags:
+      - jetstreamext-v*
 
 permissions:
   contents: write
@@ -22,9 +23,6 @@ jobs:
           python-version: |
             3.13
       - run: uv build
-        working-directory: jetstreamext
-      - if: github.event.release.prerelease
-        run: uv publish --index testpypi
         working-directory: jetstreamext
       - if: ${{ ! github.event.release.prerelease }}
         run: uv publish
