@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.2](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.1.1...jetstreamext-v0.1.2) (2025-09-08)
+
+
+### Bug Fixes
+
+* **natsext,jetstreamext:** add project.urls to pyproject.toml ([3aee485](https://github.com/oliverlambson/orbit.py/commit/3aee4854b06fe13b0390886aa7111871faba464f))
+* **natsext,jetstreamext:** line readme snippets up with runnable examples.py ([db09652](https://github.com/oliverlambson/orbit.py/commit/db0965241b25acef8c7ec37f2cc7960802ae75ba))
+
 ## [0.1.1](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.1.0...jetstreamext-v0.1.1) (2025-09-08)
 
 

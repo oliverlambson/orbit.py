@@ -1,6 +1,6 @@
 [project]
 name = "natsext"
-version = "0.1.1"
+version = "0.1.2"
 description = "Core NATS Extensions is a set of utilities providing additional features to Core NATS component of nats-py client."
 readme = "README.md"
 license = { text = "Apache 2 License" }
