@@ -37,7 +37,9 @@ dev = [
     "ty>=0.0.1a20",
 ]
 
-# TODO: how does the path dependency affect build & publish?
+[tool.uv.build-backend]
+source-exclude = ["examples.py"]
+
 [tool.uv.sources]
 natsext = { path = "../natsext" }
 

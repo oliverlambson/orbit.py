@@ -25,6 +25,8 @@ may contain wildcards) and up to a maximum byte limit.
 
 Examples:
 
+> see [examples.py](https://www.github.com/oliverlambson/orbit.py/blob/main/jetstreamext/examples.py) for a runnable version of all snippets below.
+
 - fetching 10 messages from the beginning of the stream:
 
 ```py
