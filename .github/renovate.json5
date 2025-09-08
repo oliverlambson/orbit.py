@@ -1,0 +1,22 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+  ],
+  "lockFileMaintenance": {
+    "enabled": true
+  },
+  "additionalBranchPrefix": "{{groupSlug}}-",
+  "semanticCommitType": "deps",
+  "semanticCommitScope": "{{groupSlug}}",
+  "packageRules": [
+     {
+       "matchFileNames": ["natsext/**"],
+       "groupSlug": "natsext",
+     },
+     {
+       "matchFileNames": ["jetstreamext/**"],
+       "groupSlug": "jetstreamext",
+     },
+   ],
+}
