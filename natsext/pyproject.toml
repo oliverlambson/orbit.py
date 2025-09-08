@@ -36,6 +36,12 @@ dev = [
     "ty>=0.0.1a20",
 ]
 
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
 [tool.ty.rules]
 division-by-zero = "warn"
 possibly-unresolved-reference = "warn"
