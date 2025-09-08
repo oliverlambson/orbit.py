@@ -22,14 +22,7 @@ from jetstreamext.getbatch import (
     NoMessagesError,
     SubjectRequiredError,
     get_batch,
-    get_batch_max_bytes,
-    get_batch_seq,
-    get_batch_start_time,
-    get_batch_subject,
-    get_last_msgs_batch_size,
     get_last_msgs_for,
-    get_last_msgs_up_to_seq,
-    get_last_msgs_up_to_time,
 )
 
 __all__ = [
@@ -40,13 +33,6 @@ __all__ = [
     "SubjectRequiredError",
     "__version__",
     "get_batch",
-    "get_batch_max_bytes",
-    "get_batch_seq",
-    "get_batch_start_time",
-    "get_batch_subject",
-    "get_last_msgs_batch_size",
     "get_last_msgs_for",
-    "get_last_msgs_up_to_seq",
-    "get_last_msgs_up_to_time",
     "getbatch",
 ]

@@ -25,17 +25,13 @@ async def main() -> None:
     try:
         # Basic batch fetching
         print("\n=== Basic get_batch usage ===")
-        async for msg in jetstreamext.get_batch(js, "mystream", 5):
+        async for msg in jetstreamext.get_batch(js, "mystream", batch=5):
             print(f"Received: {msg.data}")
 
         # Batch fetching with sequence start
         print("\n=== get_batch with sequence start ===")
         async for msg in jetstreamext.get_batch(
-            js,
-            "mystream",
-            5,
-            jetstreamext.get_batch_seq(50),
-            jetstreamext.get_batch_subject("foo"),
+            js, "mystream", batch=5, seq=50, subject="foo"
         ):
             print(f"Received: {msg.data}")
 
@@ -44,17 +40,15 @@ async def main() -> None:
         async for msg in jetstreamext.get_batch(
             js,
             "mystream",
-            5,
-            jetstreamext.get_batch_start_time(
-                datetime.now(timezone.utc) - timedelta(hours=1)
-            ),
+            batch=5,
+            start_time=datetime.now(timezone.utc) - timedelta(hours=1),
         ):
             print(f"Received: {msg.data}")
 
         # Batch fetching with byte limit
         print("\n=== get_batch with byte limit ===")
         async for msg in jetstreamext.get_batch(
-            js, "mystream", 10, jetstreamext.get_batch_max_bytes(1024)
+            js, "mystream", batch=10, max_bytes=1024
         ):
             print(f"Received: {msg.data}")
 
@@ -66,7 +60,7 @@ async def main() -> None:
         # Getting last messages up to sequence
         print("\n=== get_last_msgs_for with sequence limit ===")
         async for msg in jetstreamext.get_last_msgs_for(
-            js, "mystream", ["foo", "bar"], jetstreamext.get_last_msgs_up_to_seq(100)
+            js, "mystream", ["foo", "bar"], up_to_seq=100
         ):
             print(f"Received: {msg.data}")
 
@@ -76,16 +70,14 @@ async def main() -> None:
             js,
             "mystream",
             ["foo", "bar"],
-            jetstreamext.get_last_msgs_up_to_time(
-                datetime.now(timezone.utc) - timedelta(hours=1)
-            ),
+            up_to_time=datetime.now(timezone.utc) - timedelta(hours=1),
         ):
             print(f"Received: {msg.data}")
 
         # Getting last messages with batch size
         print("\n=== get_last_msgs_for with batch size ===")
         async for msg in jetstreamext.get_last_msgs_for(
-            js, "mystream", ["foo.*"], jetstreamext.get_last_msgs_batch_size(10)
+            js, "mystream", ["foo.*"], batch=10
         ):
             print(f"Received: {msg.data}")
 

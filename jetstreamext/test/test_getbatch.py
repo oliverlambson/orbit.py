@@ -44,6 +44,7 @@ async def test_get_batch(js_client: JetStreamContext):
 
     await asyncio.sleep(0.1)  # 100ms pause
     pause = datetime.now(timezone.utc)
+    await asyncio.sleep(0.1)  # Another small pause to ensure time separation
 
     for _ in range(5):
         await js.publish("foo.A", b"msg")
@@ -53,52 +54,49 @@ async def test_get_batch(js_client: JetStreamContext):
         {
             "name": "no options provided, get 10 messages",
             "batch": 10,
-            "opts": [],
             "expected_msgs": 10,
             "expected_seqs": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
         },
         {
             "name": "get 5 messages from sequence 5",
             "batch": 5,
-            "opts": [jetstreamext.get_batch_seq(5)],
+            "seq": 5,
             "expected_msgs": 5,
             "expected_seqs": [5, 6, 7, 8, 9],
         },
         {
             "name": "get 5 messages from subject foo.B",
             "batch": 5,
-            "opts": [jetstreamext.get_batch_subject("foo.B")],
+            "subject": "foo.B",
             "expected_msgs": 5,
             "expected_seqs": [2, 4, 6, 8, 10],
         },
         {
             "name": "get 5 messages from sequence 5 and subject foo.B",
             "batch": 5,
-            "opts": [
-                jetstreamext.get_batch_seq(5),
-                jetstreamext.get_batch_subject("foo.B"),
-            ],
+            "seq": 5,
+            "subject": "foo.B",
             "expected_msgs": 5,
             "expected_seqs": [6, 8, 10, 12, 14],
         },
         {
             "name": "get more messages than available",
             "batch": 10,
-            "opts": [jetstreamext.get_batch_seq(16)],
+            "seq": 16,
             "expected_msgs": 5,
             "expected_seqs": [16, 17, 18, 19, 20],
         },
         {
             "name": "with max bytes",
             "batch": 10,
-            "opts": [jetstreamext.get_batch_max_bytes(15)],
+            "max_bytes": 15,
             "expected_msgs": 2,
             "expected_seqs": [1, 2],
         },
         {
             "name": "seq higher than available",
             "batch": 10,
-            "opts": [jetstreamext.get_batch_seq(21)],
+            "seq": 21,
             "expected_msgs": 0,
             "expected_seqs": [],
             "expect_no_messages": True,
@@ -106,7 +104,7 @@ async def test_get_batch(js_client: JetStreamContext):
         {
             "name": "with start time",
             "batch": 10,
-            "opts": [jetstreamext.get_batch_start_time(pause)],
+            "start_time": pause,
             "expected_msgs": 10,
             "expected_seqs": [11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
         },
@@ -116,11 +114,14 @@ async def test_get_batch(js_client: JetStreamContext):
         print(f"Running test: {test_case['name']}")
 
         try:
+            kwargs = {
+                k: v
+                for k, v in test_case.items()
+                if k
+                not in ["name", "expected_msgs", "expected_seqs", "expect_no_messages"]
+            }
             messages = [
-                msg
-                async for msg in jetstreamext.get_batch(
-                    js, "TEST", test_case["batch"], *test_case["opts"]
-                )
+                msg async for msg in jetstreamext.get_batch(js, "TEST", **kwargs)
             ]
         except jetstreamext.NoMessagesError:
             messages = []
@@ -150,24 +151,29 @@ async def test_get_batch_invalid_options():
         match="cannot set both start time and sequence number",
     ):
         pause = datetime.now(timezone.utc)
-        opts = [jetstreamext.get_batch_start_time(pause), jetstreamext.get_batch_seq(5)]
-        # The error is raised when creating the options
-        opt_obj = jetstreamext.getbatch._GetBatchOpts(batch=10)
-        for opt in opts:
-            opt(opt_obj)
+        # This needs to be tested when calling get_batch since validation moved there
+        mock_js = MagicMock(spec=JetStreamContext)
+        async for _ in jetstreamext.get_batch(
+            mock_js, "TEST", batch=10, start_time=pause, seq=5
+        ):
+            pass
 
     # Test invalid max bytes
     with pytest.raises(
         jetstreamext.InvalidOptionError, match="max bytes has to be greater than 0"
     ):
-        jetstreamext.get_batch_max_bytes(0)
+        mock_js = MagicMock(spec=JetStreamContext)
+        async for _ in jetstreamext.get_batch(mock_js, "TEST", batch=10, max_bytes=0):
+            pass
 
     # Test invalid sequence
     with pytest.raises(
         jetstreamext.InvalidOptionError,
         match="sequence number has to be greater than 0",
     ):
-        jetstreamext.get_batch_seq(0)
+        mock_js = MagicMock(spec=JetStreamContext)
+        async for _ in jetstreamext.get_batch(mock_js, "TEST", batch=10, seq=0):
+            pass
 
 
 @pytest.mark.asyncio
@@ -186,11 +192,11 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
 
     # Publish messages in specific order (matching Go test exactly):
     # foo.A (1), foo.A (2), foo.B (3), foo.A (4), foo.B (5)
-    await js.publish("foo.A", b"msg")
-    await js.publish("foo.A", b"msg")
-    await js.publish("foo.B", b"msg")
-    await js.publish("foo.A", b"msg")
-    await js.publish("foo.B", b"msg")
+    await js.publish("foo.A", b"msg")  # seq 1
+    await js.publish("foo.A", b"msg")  # seq 2
+    await js.publish("foo.B", b"msg")  # seq 3
+    await js.publish("foo.A", b"msg")  # seq 4
+    await js.publish("foo.B", b"msg")  # seq 5
 
     # Pause here to test up_to_time
     pause = datetime.now(timezone.utc)
@@ -203,49 +209,45 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
         {
             "name": "match all subjects",
             "subjects": ["foo.*"],
-            "opts": [],
             "expected_msgs": 3,
             "expected_seqs": [4, 6, 7],
         },
         {
             "name": "match single subject",
             "subjects": ["foo.A"],
-            "opts": [],
             "expected_msgs": 1,
             "expected_seqs": [4],
         },
         {
             "name": "match multiple subjects",
             "subjects": ["foo.A", "foo.B"],
-            "opts": [],
             "expected_msgs": 2,
             "expected_seqs": [4, 6],
         },
         {
             "name": "match all up to sequence",
             "subjects": ["foo.*"],
-            "opts": [jetstreamext.get_last_msgs_up_to_seq(3)],
+            "up_to_seq": 3,
             "expected_msgs": 2,
             "expected_seqs": [2, 3],
         },
         {
             "name": "match all up to time",
             "subjects": ["foo.*"],
-            "opts": [jetstreamext.get_last_msgs_up_to_time(pause)],
+            "up_to_time": pause,
             "expected_msgs": 2,
             "expected_seqs": [4, 5],
         },
         {
             "name": "with batch size",
             "subjects": ["foo.*"],
-            "opts": [jetstreamext.get_last_msgs_batch_size(2)],
+            "batch": 2,
             "expected_msgs": 2,
             "expected_seqs": [4, 6],
         },
         {
             "name": "no messages match filter",
             "subjects": ["foo.Z"],
-            "opts": [],
             "expected_msgs": 0,
             "expected_seqs": [],
             "expect_no_messages": True,
@@ -256,10 +258,22 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
         print(f"Running test: {test_case['name']}")
 
         try:
+            kwargs = {
+                k: v
+                for k, v in test_case.items()
+                if k
+                not in [
+                    "name",
+                    "subjects",
+                    "expected_msgs",
+                    "expected_seqs",
+                    "expect_no_messages",
+                ]
+            }
             messages = [
                 msg
                 async for msg in jetstreamext.get_last_msgs_for(
-                    js, "TEST", test_case["subjects"], *test_case["opts"]
+                    js, "TEST", test_case["subjects"], **kwargs
                 )
             ]
         except jetstreamext.NoMessagesError:
@@ -299,20 +313,21 @@ async def test_get_last_msgs_for_invalid_options():
         match="cannot set both up to sequence and up to time",
     ):
         pause = datetime.now(timezone.utc)
-        opts = [
-            jetstreamext.get_last_msgs_up_to_time(pause),
-            jetstreamext.get_last_msgs_up_to_seq(3),
-        ]
-        # The error is raised when creating the options
-        opt_obj = jetstreamext.getbatch._GetLastBatchOpts(multi_last_for=["foo.*"])
-        for opt in opts:
-            opt(opt_obj)
+        mock_js = MagicMock(spec=JetStreamContext)
+        async for _ in jetstreamext.get_last_msgs_for(
+            mock_js, "TEST", ["foo"], up_to_time=pause, up_to_seq=3
+        ):
+            pass
 
     # Test invalid batch size
     with pytest.raises(
         jetstreamext.InvalidOptionError, match="batch size has to be greater than 0"
     ):
-        jetstreamext.get_last_msgs_batch_size(0)
+        mock_js = MagicMock(spec=JetStreamContext)
+        async for _ in jetstreamext.get_last_msgs_for(
+            mock_js, "TEST", ["foo"], batch=0
+        ):
+            pass
 
 
 @pytest.mark.asyncio

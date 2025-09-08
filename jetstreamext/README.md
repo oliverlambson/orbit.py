@@ -35,7 +35,7 @@ import jetstreamext
 nc = await nats.connect()
 js = nc.jetstream()
 
-async for msg in jetstreamext.get_batch(js, "stream", 10):
+async for msg in jetstreamext.get_batch(js, "stream", batch=10):
     print(msg.data)
 ```
 
@@ -48,19 +48,15 @@ import jetstreamext
 nc = await nats.connect()
 js = nc.jetstream()
 
-async for msg in jetstreamext.get_batch(
-    js,
-    "stream",
-    10,
-    jetstreamext.get_batch_seq(100),
-    jetstreamext.get_batch_subject("foo")
-):
+async for msg in jetstreamext.get_batch(js, "stream", batch=10, seq=100, subject="foo"):
     print(msg.data)
 ```
 
 - fetching 10 messages from the stream starting from time 1 hour ago:
 
 ```py
+from datetime import datetime, timedelta, timezone
+
 import nats
 import jetstreamext
 
@@ -70,8 +66,8 @@ js = nc.jetstream()
 async for msg in jetstreamext.get_batch(
     js,
     "stream",
-    10,
-    jetstreamext.get_batch_start_time(datetime.now() - timedelta(hours=1))
+    batch=10,
+    start_time=datetime.now(timezone.utc) - timedelta(hours=1)
 ):
     print(msg.data)
 ```
@@ -85,12 +81,7 @@ import jetstreamext
 nc = await nats.connect()
 js = nc.jetstream()
 
-async for msg in jetstreamext.get_batch(
-    js,
-    "stream",
-    10,
-    jetstreamext.get_batch_max_bytes(1024)
-):
+async for msg in jetstreamext.get_batch(js, "stream", batch=10, max_bytes=1024):
     print(msg.data)
 ```
 
@@ -112,11 +103,7 @@ import jetstreamext
 nc = await nats.connect()
 js = nc.jetstream()
 
-async for msg in jetstreamext.get_last_msgs_for(
-    js,
-    "stream",
-    ["foo", "bar"]
-):
+async for msg in jetstreamext.get_last_msgs_for(js, "stream", ["foo", "bar"]):
     print(msg.data)
 ```
 
@@ -129,18 +116,15 @@ import jetstreamext
 nc = await nats.connect()
 js = nc.jetstream()
 
-async for msg in jetstreamext.get_last_msgs_for(
-    js,
-    "stream",
-    ["foo", "bar"],
-    jetstreamext.get_last_msgs_up_to_seq(100)
-):
+async for msg in jetstreamext.get_last_msgs_for(js, "stream", ["foo", "bar"], up_to_seq=100):
     print(msg.data)
 ```
 
 - fetching last messages from the stream for the provided subjects up to time 1 hour ago:
 
 ```py
+from datetime import datetime, timedelta, timezone
+
 import nats
 import jetstreamext
 
@@ -151,7 +135,7 @@ async for msg in jetstreamext.get_last_msgs_for(
     js,
     "stream",
     ["foo", "bar"],
-    jetstreamext.get_last_msgs_up_to_time(datetime.now() - timedelta(hours=1))
+    up_to_time=datetime.now(timezone.utc) - timedelta(hours=1)
 ):
     print(msg.data)
 ```
@@ -165,11 +149,6 @@ import jetstreamext
 nc = await nats.connect()
 js = nc.jetstream()
 
-async for msg in jetstreamext.get_last_msgs_for(
-    js,
-    "stream",
-    ["foo.*"],
-    jetstreamext.get_last_msgs_batch_size(10)
-):
+async for msg in jetstreamext.get_last_msgs_for(js, "stream", ["foo.*"], batch=10):
     print(msg.data)
 ```

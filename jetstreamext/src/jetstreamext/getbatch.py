@@ -14,8 +14,7 @@
 from __future__ import annotations
 
 import json
-from collections.abc import AsyncIterator, Callable
-from dataclasses import dataclass
+from collections.abc import AsyncIterator
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING
 
@@ -49,137 +48,19 @@ class SubjectRequiredError(Exception):
     """Raised when no subjects are provided in get_last_msgs_for."""
 
 
-@dataclass
-class _GetBatchOpts:
-    seq: int | None = None
-    next_for: str | None = None
-    batch: int = 0
-    max_bytes: int | None = None
-    start_time: datetime | None = None
-
-
-@dataclass
-class _GetLastBatchOpts:
-    multi_last_for: list[str] | None = None
-    batch: int | None = None
-    up_to_seq: int | None = None
-    up_to_time: datetime | None = None
-
-
-# TODO: this chaining of opt "wrapper" functions is idiomatic of go, but in python
-# should probably rather be single a Config class passed in.
-def get_batch_seq(seq: int) -> Callable[[_GetBatchOpts], None]:
-    """Set the sequence number from which to start fetching messages."""
-
-    def apply_opt(opts: _GetBatchOpts) -> None:
-        if seq <= 0:
-            msg = "sequence number has to be greater than 0"
-            raise InvalidOptionError(msg)
-        if opts.start_time is not None:
-            msg = "cannot set both start time and sequence number"
-            raise InvalidOptionError(msg)
-        opts.seq = seq
-
-    # Validate immediately when creating the option
-    if seq <= 0:
-        msg = "sequence number has to be greater than 0"
-        raise InvalidOptionError(msg)
-
-    return apply_opt
-
-
-def get_batch_subject(subj: str) -> Callable[[_GetBatchOpts], None]:
-    """Set the subject from which to start fetching messages. It may include wildcards."""
-
-    def apply_opt(opts: _GetBatchOpts) -> None:
-        opts.next_for = subj
-
-    return apply_opt
-
-
-def get_batch_max_bytes(max_bytes: int) -> Callable[[_GetBatchOpts], None]:
-    """Set the maximum number of bytes to fetch.
-
-    The server will try to fetch messages until the maximum number of bytes is
-    reached (or the batch size is reached).
-    """
-
-    def apply_opt(opts: _GetBatchOpts) -> None:
-        if max_bytes <= 0:
-            msg = "max bytes has to be greater than 0"
-            raise InvalidOptionError(msg)
-        opts.max_bytes = max_bytes
-
-    # Validate immediately when creating the option
-    if max_bytes <= 0:
-        msg = "max bytes has to be greater than 0"
-        raise InvalidOptionError(msg)
-
-    return apply_opt
-
-
-def get_batch_start_time(start_time: datetime) -> Callable[[_GetBatchOpts], None]:
-    """Set the start time from which to fetch messages."""
-
-    def apply_opt(opts: _GetBatchOpts) -> None:
-        if opts.seq is not None and opts.seq != 0:
-            msg = "cannot set both start time and sequence number"
-            raise InvalidOptionError(msg)
-        opts.start_time = start_time
-
-    return apply_opt
-
-
-def get_last_msgs_up_to_seq(seq: int) -> Callable[[_GetLastBatchOpts], None]:
-    """Set the sequence number up to which to fetch messages (inclusive)."""
-
-    def apply_opt(opts: _GetLastBatchOpts) -> None:
-        if opts.up_to_time is not None:
-            msg = "cannot set both up to sequence and up to time"
-            raise InvalidOptionError(msg)
-        opts.up_to_seq = seq
-
-    return apply_opt
-
-
-def get_last_msgs_up_to_time(tm: datetime) -> Callable[[_GetLastBatchOpts], None]:
-    """Set the time up to which to fetch messages."""
-
-    def apply_opt(opts: _GetLastBatchOpts) -> None:
-        if opts.up_to_seq is not None and opts.up_to_seq != 0:
-            msg = "cannot set both up to sequence and up to time"
-            raise InvalidOptionError(msg)
-        opts.up_to_time = tm
-
-    return apply_opt
-
-
-def get_last_msgs_batch_size(batch: int) -> Callable[[_GetLastBatchOpts], None]:
-    """Set the optional batch size for fetching messages from multiple subjects."""
-
-    def apply_opt(opts: _GetLastBatchOpts) -> None:
-        if batch <= 0:
-            msg = "batch size has to be greater than 0"
-            raise InvalidOptionError(msg)
-        opts.batch = batch
-
-    # Validate immediately when creating the option
-    if batch <= 0:
-        msg = "batch size has to be greater than 0"
-        raise InvalidOptionError(msg)
-
-    return apply_opt
-
-
 async def get_batch(
     js: JetStreamContext,
     stream: str,
-    batch: int,
-    *opts: Callable[[_GetBatchOpts], None],
+    *,
+    batch: int = 1,
+    seq: int | None = None,
+    subject: str | None = None,
+    max_bytes: int | None = None,
+    start_time: datetime | None = None,
 ) -> AsyncIterator[api.RawStreamMsg]:
     """Fetch a batch of messages from the specified stream.
 
-    The batch size is determined by the `batch` parameter.
+    The batch size is determined by the batch parameter.
     The function returns an async iterator that can be used to iterate over the
     messages. Any error received during iteration will terminate the loop.
     The iterator will raise an error if there are no messages to fetch.
@@ -187,8 +68,11 @@ async def get_batch(
     Args:
         js: JetStream context
         stream: Stream name
-        batch: Batch size
-        *opts: Optional configuration functions
+        batch: Number of messages to fetch in each batch
+        seq: Sequence number to start fetching from
+        subject: Filter messages by subject
+        max_bytes: Maximum bytes to fetch
+        start_time: Start time for message fetching
 
     Yields:
         RawStreamMsg: Stream messages
@@ -199,15 +83,31 @@ async def get_batch(
         BatchUnsupportedError: If batch get is not supported
         InvalidResponseError: If server response is invalid
     """
-    req_opts = _GetBatchOpts(batch=batch)
+    # Validation
+    if batch <= 0:
+        msg = "batch size has to be greater than 0"
+        raise InvalidOptionError(msg)
+    if seq is not None and seq <= 0:
+        msg = "sequence number has to be greater than 0"
+        raise InvalidOptionError(msg)
+    if max_bytes is not None and max_bytes <= 0:
+        msg = "max bytes has to be greater than 0"
+        raise InvalidOptionError(msg)
+    if start_time is not None and seq is not None and seq != 0:
+        msg = "cannot set both start time and sequence number"
+        raise InvalidOptionError(msg)
 
-    for opt in opts:
-        opt(req_opts)
+    # Set default sequence if neither start_time nor seq are provided
+    if start_time is None and (seq is None or seq == 0):
+        seq = 1
 
-    if req_opts.start_time is None and (req_opts.seq is None or req_opts.seq == 0):
-        req_opts.seq = 1
-
-    req_json = _serialize_get_batch_opts(req_opts)
+    req_json = _serialize_get_batch_config(
+        batch=batch,
+        seq=seq,
+        subject=subject,
+        max_bytes=max_bytes,
+        start_time=start_time,
+    )
     async for msg in _get_direct(js._nc, js, stream, req_json):
         yield msg
 
@@ -216,7 +116,10 @@ async def get_last_msgs_for(
     js: JetStreamContext,
     stream: str,
     subjects: list[str],
-    *opts: Callable[[_GetLastBatchOpts], None],
+    *,
+    batch: int | None = None,
+    up_to_seq: int | None = None,
+    up_to_time: datetime | None = None,
 ) -> AsyncIterator[api.RawStreamMsg]:
     """Fetch the last messages for the specified subjects from the specified stream.
 
@@ -229,7 +132,9 @@ async def get_last_msgs_for(
         js: JetStream context
         stream: Stream name
         subjects: List of subjects to fetch messages for
-        *opts: Optional configuration functions
+        batch: Number of messages to fetch in each batch
+        up_to_seq: Fetch messages up to this sequence number
+        up_to_time: Fetch messages up to this time
 
     Yields:
         RawStreamMsg: Stream messages
@@ -245,30 +150,45 @@ async def get_last_msgs_for(
         msg = "at least one subject is required"
         raise SubjectRequiredError(msg)
 
-    req_opts = _GetLastBatchOpts(multi_last_for=subjects)
+    # Validation
+    if batch is not None and batch <= 0:
+        msg = "batch size has to be greater than 0"
+        raise InvalidOptionError(msg)
+    if up_to_time is not None and up_to_seq is not None and up_to_seq != 0:
+        msg = "cannot set both up to sequence and up to time"
+        raise InvalidOptionError(msg)
 
-    for opt in opts:
-        opt(req_opts)
-
-    req_json = _serialize_get_last_batch_opts(req_opts)
+    req_json = _serialize_get_last_msgs_config(
+        subjects=subjects,
+        batch=batch,
+        up_to_seq=up_to_seq,
+        up_to_time=up_to_time,
+    )
     async for msg in _get_direct(js._nc, js, stream, req_json):
         yield msg
 
 
-def _serialize_get_batch_opts(opts: _GetBatchOpts) -> bytes:
-    """Serialize get batch options to JSON bytes."""
-    data = {"batch": opts.batch}
+def _serialize_get_batch_config(
+    *,
+    batch: int,
+    seq: int | None = None,
+    subject: str | None = None,
+    max_bytes: int | None = None,
+    start_time: datetime | None = None,
+) -> bytes:
+    """Serialize get batch config to JSON bytes."""
+    data: dict[str, str | int] = {"batch": batch}
 
-    if opts.seq is not None:
-        data["seq"] = opts.seq
-    if opts.next_for is not None:
-        data["next_by_subj"] = opts.next_for
-    if opts.max_bytes is not None:
-        data["max_bytes"] = opts.max_bytes
-    if opts.start_time is not None:
+    if seq is not None:
+        data["seq"] = seq
+    if subject is not None:
+        data["next_by_subj"] = subject
+    if max_bytes is not None:
+        data["max_bytes"] = max_bytes
+    if start_time is not None:
         # Format in RFC3339Nano format that NATS expects
         # Convert to UTC and use Z suffix (not +00:00)
-        utc_time = opts.start_time.astimezone(timezone.utc)
+        utc_time = start_time.astimezone(timezone.utc)
         iso_str = utc_time.strftime("%Y-%m-%dT%H:%M:%S.%f")
         # Pad microseconds to nanoseconds (6 digits to 9 digits)
         parts = iso_str.split(".")
@@ -279,20 +199,24 @@ def _serialize_get_batch_opts(opts: _GetBatchOpts) -> bytes:
     return json.dumps(data).encode()
 
 
-def _serialize_get_last_batch_opts(opts: _GetLastBatchOpts) -> bytes:
-    """Serialize get last batch options to JSON bytes."""
-    data = {}
+def _serialize_get_last_msgs_config(
+    *,
+    subjects: list[str],
+    batch: int | None = None,
+    up_to_seq: int | None = None,
+    up_to_time: datetime | None = None,
+) -> bytes:
+    """Serialize get last msgs config to JSON bytes."""
+    data: dict[str, str | int | list[str]] = {"multi_last": subjects}
 
-    if opts.multi_last_for is not None:
-        data["multi_last"] = opts.multi_last_for
-    if opts.batch is not None:
-        data["batch"] = opts.batch
-    if opts.up_to_seq is not None:
-        data["up_to_seq"] = opts.up_to_seq
-    if opts.up_to_time is not None:
+    if batch is not None:
+        data["batch"] = batch
+    if up_to_seq is not None:
+        data["up_to_seq"] = up_to_seq
+    if up_to_time is not None:
         # Format in RFC3339Nano format that NATS expects
         # Convert to UTC and use Z suffix (not +00:00)
-        utc_time = opts.up_to_time.astimezone(timezone.utc)
+        utc_time = up_to_time.astimezone(timezone.utc)
         iso_str = utc_time.strftime("%Y-%m-%dT%H:%M:%S.%f")
         # Pad microseconds to nanoseconds (6 digits to 9 digits)
         parts = iso_str.split(".")
@@ -381,7 +305,7 @@ def _convert_direct_get_msg_response_to_msg(msg: Msg) -> api.RawStreamMsg:
             if len(fractional_part) > 6:
                 fractional_part = fractional_part[:6]
             iso_time = f"{before_dot}.{fractional_part}{timezone_part}"
-        datetime.fromisoformat(iso_time)
+        datetime.fromisoformat(iso_time)  # runs the actual validation
     except ValueError as e:
         msg_text = f"invalid timestamp header '{time_str}': {e}"
         raise InvalidResponseError(msg_text) from e
