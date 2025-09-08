@@ -1,9 +1,3 @@
-> [!IMPORTANT]
->
-> The codeblocks are a naive translation of the go codeblocks from orbit.go.
-> The client still has to be implemented so the api here is likely not how
-> things will actually look.
-
 # Core NATS Extensions
 
 Core NATS Extensions is a set of utilities providing additional features to Core NATS component of nats-py client.
@@ -21,33 +15,67 @@ uv add natsext
 `request_many` is a utility that allows you to send a single request and await multiple responses.
 This allows you to implement various patterns like scatter-gather or streaming responses.
 
-Responses are returned in an iterator, which you can range over to receive messages.
+Responses are returned in an async iterator, which you can iterate over to receive messages.
 When a termination condition is met, the iterator is closed (and no error is returned).
 
 ```py
-msgs = natsext.request_many(ctx, nc, "subject", b"request data")
-for msg in msgs:
+import natsext
+
+# Basic usage
+async for msg in natsext.request_many(nc, "subject", b"request data"):
     print(msg.data)
 ```
 
 Alternatively, use `request_many_msg` to send a `nats.Msg` request:
 
 ```py
+import nats
+import natsext
+
 msg = nats.Msg(
+    _client=nc,
     subject="subject",
-    data=b"request data"),
-    header={
+    data=b"request data",
+    headers={
         "Key": "Value",
     },
 )
-iter = natsext.request_many_msg(ctx, nc, msg)
-# gather responses
+async for response in natsext.request_many_msg(nc, msg):
+    print(response.data)
 ```
 
 #### Configuration
 
-Timeout and cancellation are handled by the context passed to `request_many` and `request_many_msg`. In addition, you can configure the following options:
+You can configure the following options:
 
-- `request_many_stall`: Sets the stall timer, useful in scatter-gather scenarios where subsequent responses are expected within a certain timeframe.
-- `request_many_max_messages`: Sets the maximum number of messages to receive.
-- `request_many_sentinel`: Stops receiving messages once a sentinel message is received.
+- `timeout`: Overall timeout for the request operation (float, seconds)
+- `stall`: Stall timer, useful in scatter-gather scenarios where subsequent responses are expected within a certain timeframe (float, seconds)
+- `max_messages`: Maximum number of messages to receive (int)
+- `sentinel`: Function that stops returning responses once it returns True for a message (Callable[[Msg], bool])
+
+```py
+# With all options
+async for msg in natsext.request_many(
+    nc,
+    "subject",
+    b"request data",
+    timeout=5.0,
+    stall=0.1,
+    max_messages=10,
+    sentinel=natsext.default_sentinel  # Stops on empty message
+):
+    print(msg.data)
+```
+
+#### Default Sentinel
+
+The package includes a `default_sentinel` function that stops receiving messages once a message with an empty payload is received:
+
+```py
+import natsext
+
+async for msg in natsext.request_many(
+    nc, "subject", b"request", sentinel=natsext.default_sentinel
+):
+    print(msg.data)
+```
