@@ -3,7 +3,8 @@ name = "natsext"
 version = "0.1.2"
 description = "Core NATS Extensions is a set of utilities providing additional features to Core NATS component of nats-py client."
 readme = "README.md"
-license = { text = "Apache 2 License" }
+license = "Apache-2.0"
+license-files = ["NOTICE"]
 authors = [
     { name = "Oliver Lambson", email = "oliverlambson@gmail.com" }
 ]
