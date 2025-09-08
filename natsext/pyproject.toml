@@ -36,6 +36,9 @@ dev = [
     "ty>=0.0.1a20",
 ]
 
+[tool.uv.build-backend]
+source-exclude = ["examples.py"]
+
 [[tool.uv.index]]
 name = "testpypi"
 url = "https://test.pypi.org/simple/"

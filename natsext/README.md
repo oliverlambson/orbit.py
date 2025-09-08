@@ -10,6 +10,8 @@ uv add natsext
 
 ## Utilities
 
+> see [examples.py](https://www.github.com/oliverlambson/orbit.py/blob/main/natsext/examples.py) for a runnable version of all snippets below.
+
 ### request_many
 
 `request_many` is a utility that allows you to send a single request and await multiple responses.
