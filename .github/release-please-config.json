@@ -1,0 +1,30 @@
+{
+  "bump-minor-pre-major": false,
+  "bump-patch-for-minor-pre-major": false,
+  "draft": false,
+  "prerelease": false,
+  "always-update": true,
+  "draft-pull-request": true,
+  "packages": {
+    "natsext": {
+      "package-name": "natsext",
+      "component": "natsext",
+      "release-type": "python",
+      "changelog-path": "CHANGELOG.md"
+    },
+    "jetstreamext": {
+      "package-name": "jetstreamext",
+      "component": "jetstreamext",
+      "release-type": "python",
+      "changelog-path": "CHANGELOG.md"
+    }
+  },
+  "plugins": [
+    {
+      "type": "linked-versions",
+      "groupName": "orbit.py",
+      "components": ["natsext", "jetstreamext"]
+    }
+  ],
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json"
+}
