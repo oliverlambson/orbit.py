@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.2.0...natsext-v0.3.0) (2025-09-09)
+
+
+### Bug Fixes
+
+* request_many raises NoResponsdersError instead of passing through 503 message ([8255e97](https://github.com/oliverlambson/orbit.py/commit/8255e973e87125d038adc43dac2d742d2d1522f7))
+
 ## [0.2.0](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.1.2...natsext-v0.2.0) (2025-09-08)
 
 

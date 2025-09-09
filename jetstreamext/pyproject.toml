@@ -1,6 +1,6 @@
 [project]
 name = "jetstreamext"
-version = "0.2.0"
+version = "0.3.0"
 description = "JetStream Extensions is a set of utilities providing additional features to `jetstream` package in nats-py client."
 readme = "README.md"
 license = "Apache-2.0"
