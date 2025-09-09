@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.3.0...natsext-v0.4.0) (2025-09-09)
+
+
+### Miscellaneous Chores
+
+* **natsext:** Synchronize orbit.py versions
+
 ## [0.3.0](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.2.0...natsext-v0.3.0) (2025-09-09)
 
 
