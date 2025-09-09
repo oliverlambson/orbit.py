@@ -242,11 +242,8 @@ async def _get_direct(
     async for msg in natsext.request_many(
         nc, subj, req, sentinel=eob_sentinel, timeout=30.0
     ):
-        try:
-            raw_msg = _convert_direct_get_msg_response_to_msg(msg)
-            yield raw_msg
-        except NoMessagesError:
-            return
+        raw_msg = _convert_direct_get_msg_response_to_msg(msg)
+        yield raw_msg
 
 
 def _convert_direct_get_msg_response_to_msg(msg: Msg) -> api.RawStreamMsg:
@@ -327,8 +324,8 @@ def _convert_direct_get_msg_response_to_msg(msg: Msg) -> api.RawStreamMsg:
 
 def _get_prefixed_subject(js: JetStreamContext, subject: str) -> str:
     """Get prefixed subject based on JetStream context configuration."""
-    # Access the prefix from the JetStream context
-    # In nats-py, the prefix is stored in the _prefix attribute
+    # In nats-py, the JetStream context stores the complete prefix in _prefix
+    # It handles domain/prefix logic in __init__ and stores the result
     prefix = getattr(js, "_prefix", "$JS.API")
 
     if not prefix.endswith("."):

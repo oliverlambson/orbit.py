@@ -114,20 +114,18 @@ async def test_get_batch(js_client: JetStreamContext):
     for test_case in test_cases:
         print(f"Running test: {test_case['name']}")
 
+        kwargs = {
+            k: v
+            for k, v in test_case.items()
+            if k not in ["name", "expected_msgs", "expected_seqs", "expect_no_messages"]
+        }
+        messages = []
         try:
-            kwargs = {
-                k: v
-                for k, v in test_case.items()
-                if k
-                not in ["name", "expected_msgs", "expected_seqs", "expect_no_messages"]
-            }
-            messages = [
-                msg async for msg in jetstreamext.get_batch(js, "TEST", **kwargs)
-            ]
+            async for msg in jetstreamext.get_batch(js, "TEST", **kwargs):
+                messages.append(msg)  # noqa: PERF401
         except (jetstreamext.NoMessagesError, NoRespondersError):
-            messages = []
             if test_case.get("expect_no_messages"):
-                continue
+                pass  # Expected no messages
             else:
                 raise
 
@@ -258,29 +256,27 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
     for test_case in test_cases:
         print(f"Running test: {test_case['name']}")
 
-        try:
-            kwargs = {
-                k: v
-                for k, v in test_case.items()
-                if k
-                not in [
-                    "name",
-                    "subjects",
-                    "expected_msgs",
-                    "expected_seqs",
-                    "expect_no_messages",
-                ]
-            }
-            messages = [
-                msg
-                async for msg in jetstreamext.get_last_msgs_for(
-                    js, "TEST", test_case["subjects"], **kwargs
-                )
+        kwargs = {
+            k: v
+            for k, v in test_case.items()
+            if k
+            not in [
+                "name",
+                "subjects",
+                "expected_msgs",
+                "expected_seqs",
+                "expect_no_messages",
             ]
+        }
+        messages = []
+        try:
+            async for msg in jetstreamext.get_last_msgs_for(
+                js, "TEST", test_case["subjects"], **kwargs
+            ):
+                messages.append(msg)  # noqa: PERF401
         except (jetstreamext.NoMessagesError, NoRespondersError):
-            messages = []
             if test_case.get("expect_no_messages"):
-                continue
+                pass  # Expected no messages
             else:
                 raise
 
