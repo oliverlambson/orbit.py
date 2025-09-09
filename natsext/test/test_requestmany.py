@@ -322,9 +322,9 @@ async def test_request_many_sentinel_custom(nats_client: NATS):
     # Set up responder that sends multiple messages
     async def responder(msg: Msg):
         await nc.publish(msg.reply, b"hello")
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.01)  # 10ms delay
         await nc.publish(msg.reply, b"world")
-        await asyncio.sleep(0.01)
+        await asyncio.sleep(0.01)  # 10ms delay
         await nc.publish(msg.reply, b"goodbye")
 
     sub = await nc.subscribe("foo", cb=responder)
@@ -333,40 +333,6 @@ async def test_request_many_sentinel_custom(nats_client: NATS):
         expected_msgs = ["hello", "world"]
 
         # Custom sentinel that stops at "goodbye"
-        def goodbye_sentinel(msg: Msg) -> bool:
-            return msg.data == b"goodbye"
-
-        received_msgs = [
-            msg.data.decode()
-            async for msg in request_many(nc, "foo", b"", sentinel=goodbye_sentinel)
-        ]
-
-        assert len(received_msgs) == len(expected_msgs)
-        assert received_msgs == expected_msgs
-
-    finally:
-        await sub.unsubscribe()
-
-
-@pytest.mark.asyncio
-async def test_request_many_sentinel_go_equivalent(nats_client: NATS):
-    """Test request_many with custom sentinel (equivalent to Go TestRequestManySentinel)"""
-    nc = nats_client
-
-    # Set up responder that sends exactly the same pattern as Go test
-    async def responder(msg: Msg):
-        await nc.publish(msg.reply, b"hello")
-        await asyncio.sleep(0.01)  # 10ms delay
-        await nc.publish(msg.reply, b"world")
-        await asyncio.sleep(0.01)  # 10ms delay
-        await nc.publish(msg.reply, b"goodbye")
-
-    sub = await nc.subscribe("foo", cb=responder)
-
-    try:
-        expected_msgs = ["hello", "world"]
-
-        # Custom sentinel that stops at "goodbye" - matches Go test exactly
         def goodbye_sentinel(msg: Msg) -> bool:
             return msg.data == b"goodbye"
 
