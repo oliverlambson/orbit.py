@@ -18,6 +18,7 @@ from unittest.mock import MagicMock
 import pytest
 from nats import NATS
 from nats.aio.msg import Msg
+from nats.errors import NoRespondersError
 from nats.js import JetStreamContext, api
 
 import jetstreamext
@@ -123,7 +124,7 @@ async def test_get_batch(js_client: JetStreamContext):
             messages = [
                 msg async for msg in jetstreamext.get_batch(js, "TEST", **kwargs)
             ]
-        except jetstreamext.NoMessagesError:
+        except (jetstreamext.NoMessagesError, NoRespondersError):
             messages = []
             if test_case.get("expect_no_messages"):
                 continue
@@ -276,7 +277,7 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
                     js, "TEST", test_case["subjects"], **kwargs
                 )
             ]
-        except jetstreamext.NoMessagesError:
+        except (jetstreamext.NoMessagesError, NoRespondersError):
             messages = []
             if test_case.get("expect_no_messages"):
                 continue

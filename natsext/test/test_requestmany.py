@@ -19,6 +19,7 @@ import pytest
 import pytest_asyncio
 from nats import NATS
 from nats.aio.msg import Msg
+from nats.errors import NoRespondersError
 from testcontainers.nats import NatsContainer
 
 from natsext import default_sentinel, request_many, request_many_msg
@@ -211,14 +212,12 @@ async def test_request_many_no_responders(nats_client: NATS):
     """Test request_many with no responders"""
     nc = nats_client
 
-    msg_count = 0
-    async for _msg in request_many(
-        nc, "no.responders.test.subject", b"", timeout=0.1
-    ):  # Add timeout to avoid hanging
-        msg_count += 1
-
-    # Python NATS client behavior may differ from Go - getting 1 message is acceptable here
-    assert msg_count <= 1
+    # Should raise NoRespondersError when there are no responders
+    with pytest.raises(NoRespondersError):
+        async for _msg in request_many(
+            nc, "no.responders.test.subject", b"", timeout=0.1
+        ):
+            pass  # Should not reach this point
 
 
 @pytest.mark.asyncio
@@ -226,12 +225,12 @@ async def test_request_many_no_responders_with_timeout(nats_client: NATS):
     """Test request_many with no responders and shorter timeout"""
     nc = nats_client
 
-    msg_count = 0
-    async for _msg in request_many(nc, "no.responders.timeout.test", b"", timeout=0.1):
-        msg_count += 1
-
-    # Python NATS client behavior may differ from Go - getting 1 message is acceptable here
-    assert msg_count <= 1
+    # Should raise NoRespondersError when there are no responders
+    with pytest.raises(NoRespondersError):
+        async for _msg in request_many(
+            nc, "no.responders.timeout.test", b"", timeout=0.1
+        ):
+            pass  # Should not reach this point
 
 
 @pytest.mark.asyncio

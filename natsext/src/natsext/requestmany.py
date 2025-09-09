@@ -18,6 +18,7 @@ from collections.abc import AsyncIterator, Callable
 
 from nats import NATS
 from nats.aio.msg import Msg
+from nats.errors import NoRespondersError
 from nats.errors import TimeoutError as NatsTimeoutError
 
 
@@ -173,6 +174,11 @@ async def _request_many(
             except Exception:  # noqa: BLE001
                 # Other errors (like connection closed) - stop iteration
                 break
+
+            # Check for "no responders" status message from server
+            if msg.headers and msg.headers.get("Status") == "503":
+                error_msg = "No responders available for request"
+                raise NoRespondersError(error_msg)
 
             # Check sentinel condition
             if sentinel is not None and sentinel(msg):
