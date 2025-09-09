@@ -30,7 +30,7 @@ async def test_get_batch(js_client: JetStreamContext):
     js = js_client
 
     # Create stream
-    await js.add_stream(
+    _ = await js.add_stream(
         api.StreamConfig(
             name="TEST",
             subjects=["foo.*"],
@@ -40,16 +40,16 @@ async def test_get_batch(js_client: JetStreamContext):
 
     # Publish some messages
     for _ in range(5):
-        await js.publish("foo.A", b"msg")
-        await js.publish("foo.B", b"msg")
+        _ = await js.publish("foo.A", b"msg")
+        _ = await js.publish("foo.B", b"msg")
 
     await asyncio.sleep(0.1)  # 100ms pause
     pause = datetime.now(timezone.utc)
     await asyncio.sleep(0.1)  # Another small pause to ensure time separation
 
     for _ in range(5):
-        await js.publish("foo.A", b"msg")
-        await js.publish("foo.B", b"msg")
+        _ = await js.publish("foo.A", b"msg")
+        _ = await js.publish("foo.B", b"msg")
 
     test_cases = [
         {
@@ -181,7 +181,7 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
     js = js_client
 
     # Create stream
-    await js.add_stream(
+    _ = await js.add_stream(
         api.StreamConfig(
             name="TEST",
             subjects=["foo.*"],
@@ -191,18 +191,18 @@ async def test_get_last_msgs_for(js_client: JetStreamContext):
 
     # Publish messages in specific order (matching Go test exactly):
     # foo.A (1), foo.A (2), foo.B (3), foo.A (4), foo.B (5)
-    await js.publish("foo.A", b"msg")  # seq 1
-    await js.publish("foo.A", b"msg")  # seq 2
-    await js.publish("foo.B", b"msg")  # seq 3
-    await js.publish("foo.A", b"msg")  # seq 4
-    await js.publish("foo.B", b"msg")  # seq 5
+    _ = await js.publish("foo.A", b"msg")  # seq 1
+    _ = await js.publish("foo.A", b"msg")  # seq 2
+    _ = await js.publish("foo.B", b"msg")  # seq 3
+    _ = await js.publish("foo.A", b"msg")  # seq 4
+    _ = await js.publish("foo.B", b"msg")  # seq 5
 
     # Pause here to test up_to_time
     pause = datetime.now(timezone.utc)
-    await asyncio.sleep(0.1)  # 100ms delay
+    _ = await asyncio.sleep(0.1)  # 100ms delay
 
-    await js.publish("foo.B", b"msg")  # seq 6
-    await js.publish("foo.C", b"msg")  # seq 7
+    _ = await js.publish("foo.B", b"msg")  # seq 6
+    _ = await js.publish("foo.C", b"msg")  # seq 7
 
     test_cases = [
         {
@@ -499,7 +499,7 @@ async def test_convert_direct_get_msg_response_to_msg():
 
         if test_case["with_err"] is not None:
             with pytest.raises(test_case["with_err"]):
-                jetstreamext.getbatch._convert_direct_get_msg_response_to_msg(
+                _ = jetstreamext.getbatch._convert_direct_get_msg_response_to_msg(
                     test_case["msg"]
                 )
         else:

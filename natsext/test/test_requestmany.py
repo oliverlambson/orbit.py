@@ -240,13 +240,13 @@ async def test_request_many_invalid_options(nats_client: NATS):
 
     # Test invalid stall time - validation happens immediately
     with pytest.raises(ValueError, match="stall time has to be greater than 0"):
-        request_many(nc, "test", b"", stall=-1)
+        _ = request_many(nc, "test", b"", stall=-1)
 
     # Test invalid max messages - validation happens immediately
     with pytest.raises(
         ValueError, match="expected request count has to be greater than 0"
     ):
-        request_many(nc, "test", b"", max_messages=-1)
+        _ = request_many(nc, "test", b"", max_messages=-1)
 
 
 @pytest.mark.asyncio
@@ -265,7 +265,7 @@ async def test_request_many_cancel(nats_client: NATS):
 
         async def cancel_after_delay():
             await asyncio.sleep(0.1)
-            task.cancel()
+            _ = task.cancel()
 
         # Start the request_many iteration
         async def iterate():
