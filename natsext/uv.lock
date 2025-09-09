@@ -145,7 +145,7 @@ sdist = { url = "https://files.pythonhosted.org/packages/65/be/757c8af63596453da
 
 [[package]]
 name = "natsext"
-version = "0.3.0"
+version = "0.4.0"
 source = { editable = "." }
 dependencies = [
     { name = "nats-py" },
