@@ -16,7 +16,7 @@ You can <!--use the library as a whole, or-->pick just what you need.
 
 # Utilities
 
-| Package (`PyPI name`)                 | Description          | Docs                                | Version |
-| ------------------------------------- | -------------------- | ----------------------------------- | ------- |
-| Core NATS Extensions (`natsext`)      | Core NATS extensions | [README.md](natsext/README.md)      | 0.1.0   |
-| JetStream Extensions (`jetstreamext`) | JetStream extensions | [README.md](jetstreamext/README.md) | 0.1.0   |
+| Package (`PyPI name`)                 | Description          | Docs                                | Version                                                                                            |
+| ------------------------------------- | -------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------- |
+| Core NATS Extensions (`natsext`)      | Core NATS extensions | [README.md](natsext/README.md)      | [![PyPI version](https://img.shields.io/pypi/v/natsext)](https://www.pypi.org/p/natsext)           |
+| JetStream Extensions (`jetstreamext`) | JetStream extensions | [README.md](jetstreamext/README.md) | [![PyPI version](https://img.shields.io/pypi/v/jetstreamext)](https://www.pypi.org/p/jetstreamext) |
