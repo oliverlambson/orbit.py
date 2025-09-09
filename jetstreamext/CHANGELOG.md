@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.3.0...jetstreamext-v0.4.0) (2025-09-09)
+
+
+### Bug Fixes
+
+* get_batch should pass-through NoRespondersError ([b07c0d1](https://github.com/oliverlambson/orbit.py/commit/b07c0d12e6b5bec6f21c204659d1f43f2c23c47a))
+
 ## [0.3.0](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.2.0...jetstreamext-v0.3.0) (2025-09-09)
 
 
