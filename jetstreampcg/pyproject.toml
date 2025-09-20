@@ -1,0 +1,92 @@
+[project]
+name = "jetstreampcg"
+version = "0.1.0"
+description = "JetStream partitioned consumer groups is an implementation of a client-side partitioned consumer group feature for NATS streams."
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["NOTICE"]
+authors = [
+    { name = "Oliver Lambson", email = "oliverlambson@gmail.com" }
+]
+requires-python = ">=3.10"
+dependencies = [
+    "nats-py>=2.11.0",
+]
+classifiers = [
+    'License :: OSI Approved :: Apache Software License',
+    'Intended Audience :: Developers',
+    'Development Status :: 2 - Pre-Alpha',
+    'Programming Language :: Python',
+    'Programming Language :: Python :: 3',
+    'Programming Language :: Python :: 3.10',
+    'Programming Language :: Python :: 3.11',
+    'Programming Language :: Python :: 3.12',
+    'Programming Language :: Python :: 3.13'
+]
+
+[project.urls]
+"Homepage" = "https://github.com/oliverlambson/orbit.py"
+"Bug Tracker" = "https://github.com/oliverlambson/orbit.py/issues"
+
+[build-system]
+requires = ["uv_build>=0.8.15,<0.9.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "basedpyright>=1.31.4",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.1.0",
+    "ruff>=0.12.12",
+    "testcontainers>=4.12.0",
+    "ty>=0.0.1a20",
+]
+
+[tool.uv.build-backend]
+source-exclude = ["examples.py"]
+
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
+[tool.ty.rules]
+division-by-zero = "warn"
+possibly-unresolved-reference = "warn"
+unused-ignore-comment = "warn"
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "W",     # pycodestyle warnings
+    "F",     # pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # bugbear
+    "TD",    # todos
+    "PERF",  # performance
+    "RUF",   # ruff
+    "ASYNC", # flake8-async
+    "S",     # bandit
+    "BLE",   # blind except
+    "FBT",   # boolean trap
+    "A",     # shadowing builtins
+    "DTZ",   # datetime timezone
+    "EM",    # error message
+    "FA",    # future annotations
+    "G",     # logging format
+]
+ignore = [
+    "E501",  # line too long (handled by ruff format)
+    "W505",  # line too long (handled by ruff format)
+    "TD002", # todo author
+    "TD003", # todo link
+    "S101",  # use of assert
+]
+
+[tool.ruff.format]
+docstring-code-format = true
