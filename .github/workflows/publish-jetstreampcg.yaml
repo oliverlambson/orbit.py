@@ -1,0 +1,27 @@
+name: publish-jetstreampcg
+
+on:
+  push:
+    tags:
+      - jetstreampcg-v*
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  jetstreampcg-publish:
+    if: ${{ ! github.event.pull_request.draft == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: |
+            3.13
+      - run: uv build
+        working-directory: jetstreampcg
+      - if: ${{ ! github.event.release.prerelease }}
+        run: uv publish
+        working-directory: jetstreampcg
