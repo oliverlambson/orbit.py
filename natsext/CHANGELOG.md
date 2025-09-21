@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.4.0...natsext-v0.4.1) (2025-09-21)
+
+
+### Dependencies
+
+* **natsext:** lock file maintenance ([#18](https://github.com/oliverlambson/orbit.py/issues/18)) ([5de8644](https://github.com/oliverlambson/orbit.py/commit/5de8644adef964839020e804c796abe79e5ac891))
+
 ## [0.4.0](https://github.com/oliverlambson/orbit.py/compare/natsext-v0.3.0...natsext-v0.4.0) (2025-09-09)
 
 
