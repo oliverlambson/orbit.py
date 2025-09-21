@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.1](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.4.0...jetstreamext-v0.4.1) (2025-09-21)
+
+
+### Dependencies
+
+* **jetstreamext:** lock file maintenance ([#17](https://github.com/oliverlambson/orbit.py/issues/17)) ([54618b6](https://github.com/oliverlambson/orbit.py/commit/54618b6fde2057da6d7525e2e53a7b12a7cb882c))
+
 ## [0.4.0](https://github.com/oliverlambson/orbit.py/compare/jetstreamext-v0.3.0...jetstreamext-v0.4.0) (2025-09-09)
 
 
