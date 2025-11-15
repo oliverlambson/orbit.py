@@ -10,7 +10,7 @@ authors = [
 ]
 requires-python = ">=3.10"
 dependencies = [
-    "nats-py>=2.11.0",
+    "nats-py>=2.12.0",
 ]
 classifiers = [
     'License :: OSI Approved :: Apache Software License',
@@ -44,6 +44,9 @@ dev = [
 
 [tool.uv.build-backend]
 source-exclude = ["examples.py"]
+
+[tool.uv.sources]
+nats-py = { git = "https://www.github.com/oliverlambson/nats.py", subdirectory = "nats", rev = "1181018c80476413ade3f8849980afa3c8835ebd" }
 
 [[tool.uv.index]]
 name = "testpypi"
