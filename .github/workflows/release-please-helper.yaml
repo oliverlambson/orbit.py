@@ -17,7 +17,7 @@ jobs:
     if: startsWith(github.head_ref, 'release-please--')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           token: ${{ secrets.RELEASE_PLEASE_GITHUB_TOKEN }}
           ref: ${{ github.head_ref }}
