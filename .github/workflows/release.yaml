@@ -16,7 +16,7 @@ jobs:
       pr: ${{ steps.release-please.outputs.pr }}
       prs_created: ${{ steps.release-please.outputs.prs_created }}
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release-please
         with:
           config-file: .github/release-please-config.json
